@@ -39,6 +39,11 @@ namespace CallsRegistry
                 jsonFormatter.PublicSerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
 
             }).SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+
+            services.AddSpaStaticFiles(configuration =>
+            {
+                configuration.RootPath = "wwwroot";
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -47,7 +52,6 @@ namespace CallsRegistry
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-
             }
 
             using (var scope = app.ApplicationServices.CreateScope())
@@ -58,7 +62,13 @@ namespace CallsRegistry
                 }
             }
 
-            app.UseMvc();
+            app.UseStaticFiles();
+            app.UseMvc(routes => { routes.MapRoute("default", "api/{controller}"); });
+
+            app.UseSpa(spa =>
+            {
+                spa.Options.SourcePath = "wwwroot";
+            });
         }
     }
 }

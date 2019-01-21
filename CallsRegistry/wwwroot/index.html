@@ -1,0 +1,155 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Calls registry</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reqwest/2.0.5/reqwest.js"></script>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+
+    <!--<script src="https://cdn.jsdelivr.net/npm/vue"></script>-->
+</head>
+<body>
+    <div id="app" class="container">
+
+        <h2 class="my-3">MSISDN registry</h2>
+        <form class="form-inline mb-3" id="filter" v-on:submit="filter">
+            <label class="my-1 mr-2" for="from">From</label>
+            <input class="form-control mb-2 mr-sm-2" id="from" type="date" v-model="from" placeholder="date from" />
+            <label class="my-1 mr-2" for="to">To</label>
+            <input class="form-control mb-2 mr-sm-2" type="date" v-model="to" />
+            <select class="form-control mb-2 mr-sm-2" type="date" v-model="type">
+                <option value="call">Call</option>
+                <option value="sms">Sms</option>
+            </select>
+            <button class="btn btn-primary mb-2" type="submit" id="doFilter">Filter</button>
+        </form>
+
+        <div v-if="type == 'call'">
+            <h3>Top 5 callers</h3>
+            
+            <div v-if="top5callers.length == 0" class="alert alert-info">
+                No calls in given period
+            </div>
+
+            <table class="table mt-2" v-if="top5callers.length > 0">
+                <thead>
+                    <tr>
+                        <th>MSISDN</th>
+                        <th>Duration</th>
+                    </tr>
+                </thead>
+                <tbody v-for="caller in top5callers">
+                    <tr>
+                        <td>{{caller.msisdn}}</td>
+                        <td>{{caller.duration}}</td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th>Total sms in whole period</th>
+                        <th>{{totalCalls}}</th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        
+        <div v-if="type == 'sms'">
+            <h3>Top 5 sms senders</h3>
+            
+            <div v-if="top5SmsSenders.length == 0" class="alert alert-info">
+                No sms in given period
+            </div>
+            <table class="table mt-2" v-if="top5SmsSenders.length > 0">
+                <thead>
+                    <tr>
+                        <th>MSISDN</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody v-for="sender in top5SmsSenders">
+                    <tr>
+                        <td>{{sender.msisdn}}</td>
+                        <td>{{sender.count}}</td>
+                    </tr>
+                </tbody>
+                <tfoot class="tfoot-dark">
+                    <tr>
+                        <th>Total calls in whole period</th>
+                        <th>{{totalSms}}</th>
+                    </tr>
+                </tfoot>
+            </table>
+
+
+        </div>
+
+    </div>
+    <script type="text/javascript">
+        Date.prototype.formatDateOnly = function () {
+            var month = '' + (this.getMonth() + 1),
+                day = '' + this.getDate(),
+                year = this.getFullYear();
+
+            if (month.length < 2) month = '0' + month;
+            if (day.length < 2) day = '0' + day;
+
+            return [year, month, day].join('-');
+        }
+        Date.prototype.addDays = function (days) {
+            var t = this.getTime();
+            return new Date(t + days * 24 * 60 * 60 * 1000);
+        }
+
+        var app = new Vue({
+            el: '#app',
+            data: {
+                type: 'sms',
+                from: new Date().addDays(-365).formatDateOnly(),
+                to: new Date().formatDateOnly(),
+                totalSms: 0,
+                totalCalls: 0,
+                top5callers: [],
+                top5SmsSenders: []
+            },
+            mounted: function () {
+                this.$options.methods.filter.apply(this);
+            },
+            methods: {
+                filter: function (evt) {
+
+                    var self = this;
+                    if (evt)
+                        evt.preventDefault();
+
+                    switch (this.type) {
+                        case 'sms':
+                            {
+                                reqwest({
+                                    url: 'api/sms/top5-by-amount?from=' + this.from + '&to=' + this.to,
+                                    type: 'json'
+                                })
+                                    .then(function (resp) {
+                                        self.top5SmsSenders = resp.items;
+                                        self.totalSms = resp.total;
+                                    });
+                            }
+                            break;
+                        case 'call':
+                            {
+                                reqwest({
+                                    url: 'api/calls/top5-by-total-duration?from=' + this.from + '&to=' + this.to,
+                                    type: 'json'
+                                })
+                                    .then(function (resp) {
+                                        self.top5callers = resp.items;
+                                        self.totalCalls = resp.total;
+                                    });
+                            }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

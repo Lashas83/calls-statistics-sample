@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 
 namespace CallsRegistry
 {
@@ -15,6 +16,7 @@ namespace CallsRegistry
         public static IWebHostBuilder CreateWebHostBuilder(string[] args)
         {
             return WebHost.CreateDefaultBuilder(args)
+                .ConfigureAppConfiguration(cfg => cfg.AddEnvironmentVariables())
                 .UseStartup<Startup>();
         }
     }
