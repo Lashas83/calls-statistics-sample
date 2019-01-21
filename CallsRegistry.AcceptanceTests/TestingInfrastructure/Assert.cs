@@ -1,0 +1,22 @@
+using NHamcrest;
+using NHamcrest.Core;
+
+namespace CallsRegistry.AcceptanceTests
+{
+    public class Assert : Xunit.Assert
+    {
+        public static void That<T>(T actual, IMatcher<T> matcher)
+        {
+            if (matcher.Matches(actual))
+                return;
+
+            var description = new StringDescription();
+            matcher.DescribeTo(description);
+
+            var mismatchDescription = new StringDescription();
+            matcher.DescribeMismatch(actual, mismatchDescription);
+
+            throw new MatchException(description.ToString(), mismatchDescription.ToString(), null);
+        }
+    }
+}
