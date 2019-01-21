@@ -3,11 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.271
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BAF734EC-F72F-43B3-9329-F2192DA15539}"
-	ProjectSection(SolutionItems) = preProject
-		Readme.md = Readme.md
-	EndProjectSection
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CallsRegistry", "CallsRegistry\CallsRegistry.csproj", "{B43242A5-A792-44AA-9E9A-2C8E7E36BB77}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CallsRegistry.AcceptanceTests", "CallsRegistry.AcceptanceTests\CallsRegistry.AcceptanceTests.csproj", "{053C3E6C-2EB9-43A1-B00B-BAD916905AA9}"

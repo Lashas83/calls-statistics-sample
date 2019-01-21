@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Console;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
@@ -25,12 +27,21 @@ namespace CallsRegistry
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            Console.WriteLine("executing configure services");
-
             var connString = Configuration.GetConnectionString("CallsRegistry");
+            var generateData = Configuration.GetValue<bool>("GenerateData");
 
-            services.AddDbContext<CallsRegistryContext>(opt => opt.UseSqlServer(connString));
+            var loggerFactory = new LoggerFactory(new ILoggerProvider[]
+            {
+                new ConsoleLoggerProvider((s, level) => level >= LogLevel.Information, true),
+            });
+
+            services.AddDbContext<CallsRegistryContext>(opt => opt.UseSqlServer(connString).UseLoggerFactory(loggerFactory));
             services.AddTransient<ICallsSummaryStorage, EntityFrameworkCallsSummaryStorage>();
+
+            if (generateData)
+                services.AddSingleton<IDataGenerator>(new PseudoRandomDataGenerator(new Random(123456)));
+            else
+                services.AddSingleton<IDataGenerator, NopDataGenerator>();
 
             services.AddMvc(opt =>
             {
@@ -59,6 +70,10 @@ namespace CallsRegistry
                 using (var db = scope.ServiceProvider.GetService<CallsRegistryContext>())
                 {
                     db.Database.Migrate();
+
+                    var dataGenerator = scope.ServiceProvider.GetService<IDataGenerator>();
+
+                    dataGenerator.Prefill(db).ConfigureAwait(false).GetAwaiter().GetResult();
                 }
             }
 

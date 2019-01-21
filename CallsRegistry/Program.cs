@@ -8,16 +8,10 @@ namespace CallsRegistry
     {
         public static void Main(string[] args)
         {
-            CreateWebHostBuilder(args).Build().Run();
-
-            // TODO: here we probably should create some random data...
-        }
-
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args)
-        {
-            return WebHost.CreateDefaultBuilder(args)
-                .ConfigureAppConfiguration(cfg => cfg.AddEnvironmentVariables())
-                .UseStartup<Startup>();
+            WebHost.CreateDefaultBuilder(args)
+                .UseStartup<Startup>()
+                .Build()
+                .Run();
         }
     }
 }

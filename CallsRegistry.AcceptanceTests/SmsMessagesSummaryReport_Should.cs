@@ -12,12 +12,10 @@ namespace CallsRegistry.AcceptanceTests
     [Collection("WebApplication")]
     public class SmsMessagesSummaryReport_Should : IClassFixture<SmsMessagesReportFixture>
     {
-        private readonly ITestOutputHelper _output;
-        private CallsRegistryApiClient _api;
+        private readonly CallsRegistryApiClient _api;
 
         public SmsMessagesSummaryReport_Should(CallsRegistryHost host, SmsMessagesReportFixture testData, ITestOutputHelper output)
         {
-            _output = output;
             _api = new CallsRegistryApiClient("http://localhost:1234", () => new HttpLoggingHandler(new HttpClientHandler(), output));
 
             testData.EnsureInitialized(host.Configuration.GetConnectionString("CallsRegistry"));
