@@ -61,7 +61,7 @@ namespace CallsRegistry.AcceptanceTests
                     new SmsSummary("3706230006", 2),
                     new SmsSummary("3706230002", 1),
                     new SmsSummary("3706230003", 1)
-                    
+
                 } };
 
                 yield return new object[] { DateTimeOffset.Parse("2018-01-01"), DateTimeOffset.Parse("2018-01-02"), 2, new []
@@ -84,7 +84,7 @@ namespace CallsRegistry.AcceptanceTests
 
         [Theory]
         [MemberData(nameof(SmsMessagesSummaries))]
-        public async Task Return_top_5_calls_in_given_period(DateTimeOffset startDate, DateTimeOffset endDate, int expectedTotal, SmsSummary[] smsMessages)
+        public async Task Return_top_5_senders_in_given_period(DateTimeOffset startDate, DateTimeOffset endDate, int expectedTotal, SmsSummary[] smsMessages)
         {
             var response = await _api.GetSendersTop5ByAmountOfMessages(startDate, endDate);
             response.EnsureSuccessStatusCode();

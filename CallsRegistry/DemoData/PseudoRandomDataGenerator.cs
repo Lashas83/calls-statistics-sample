@@ -6,7 +6,7 @@ using CallsRegistry.Model;
 using CallsRegistry.Persistence;
 using Microsoft.EntityFrameworkCore;
 
-namespace CallsRegistry
+namespace CallsRegistry.DemoData
 {
     public class PseudoRandomDataGenerator : IDataGenerator
     {

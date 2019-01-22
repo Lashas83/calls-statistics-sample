@@ -1,4 +1,5 @@
 ﻿using System;
+using CallsRegistry.DemoData;
 using CallsRegistry.Persistence;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;

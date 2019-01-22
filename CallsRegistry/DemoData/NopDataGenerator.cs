@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using CallsRegistry.Persistence;
 
-namespace CallsRegistry
+namespace CallsRegistry.DemoData
 {
     public class NopDataGenerator : IDataGenerator
     {
