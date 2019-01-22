@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Linq;
 using CallsRegistry.Persistence;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Console;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -30,12 +26,12 @@ namespace CallsRegistry
             var connString = Configuration.GetConnectionString("CallsRegistry");
             var generateData = Configuration.GetValue<bool>("GenerateData");
 
-            var loggerFactory = new LoggerFactory(new ILoggerProvider[]
-            {
-                new ConsoleLoggerProvider((s, level) => level >= LogLevel.Information, true),
-            });
+            services.Configure<ConsoleLoggerOptions>(Configuration);
+            services.AddOptions<ConsoleLoggerOptions>();
 
-            services.AddDbContext<CallsRegistryContext>(opt => opt.UseSqlServer(connString).UseLoggerFactory(loggerFactory));
+            services.AddDbContext<CallsRegistryContext>(opt => opt
+                .UseSqlServer(connString)
+            );
             services.AddTransient<ICallsSummaryStorage, EntityFrameworkCallsSummaryStorage>();
 
             if (generateData)
@@ -43,13 +39,13 @@ namespace CallsRegistry
             else
                 services.AddSingleton<IDataGenerator, NopDataGenerator>();
 
-            services.AddMvc(opt =>
-            {
-                var jsonFormatter = opt.OutputFormatters.OfType<JsonOutputFormatter>().First();
-                jsonFormatter.PublicSerializerSettings.Formatting = Formatting.Indented;
-                jsonFormatter.PublicSerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
-
-            }).SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddMvcCore()
+                .AddJsonFormatters(settings =>
+                {
+                    settings.Formatting = Formatting.Indented;
+                    settings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+                })
+                .AddCors();
 
             services.AddSpaStaticFiles(configuration =>
             {
@@ -60,11 +56,19 @@ namespace CallsRegistry
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
+            InitializeDatabase(app);
 
+            app.UseStaticFiles();
+            app.UseMvc(routes => { routes.MapRoute("default", "api/{controller}"); });
+
+            app.UseSpa(spa =>
+            {
+                spa.Options.SourcePath = "wwwroot";
+            });
+        }
+
+        private static void InitializeDatabase(IApplicationBuilder app)
+        {
             using (var scope = app.ApplicationServices.CreateScope())
             {
                 using (var db = scope.ServiceProvider.GetService<CallsRegistryContext>())
@@ -76,14 +80,6 @@ namespace CallsRegistry
                     dataGenerator.Prefill(db).ConfigureAwait(false).GetAwaiter().GetResult();
                 }
             }
-
-            app.UseStaticFiles();
-            app.UseMvc(routes => { routes.MapRoute("default", "api/{controller}"); });
-
-            app.UseSpa(spa =>
-            {
-                spa.Options.SourcePath = "wwwroot";
-            });
         }
     }
 }
