@@ -35,7 +35,7 @@ namespace CallsRegistry
             for (var i = 0; i < 5000; i++)
             {
                 yield return new Call(msisdn[_rand.Next(msisdn.Count)], _rand.Next(15, 300),
-                    DateTimeOffset.UtcNow.AddMinutes(-_rand.Next(5, 1752) * 20).AddSeconds(_rand.Next(60)));
+                    DateTimeOffset.UtcNow.AddMinutes(-_rand.Next(5, 7008) * 20).AddSeconds(_rand.Next(60)));
             }
         }
 
@@ -44,7 +44,7 @@ namespace CallsRegistry
             for (var i = 0; i < 5000; i++)
             {
                 yield return new SmsMessage(msisdn[_rand.Next(msisdn.Count)],
-                    DateTimeOffset.UtcNow.AddMinutes(-_rand.Next(5, 1752) * 20).AddSeconds(_rand.Next(60)));
+                    DateTimeOffset.UtcNow.AddMinutes(-_rand.Next(5, 7008) * 20).AddSeconds(_rand.Next(60)));
             }
         }
 
